@@ -1,10 +1,14 @@
 //import recipeContainer from '../controller.js';
 //import renderSpinner from '../controller.js';
-import icons from '../../img/icons.svg';
+const icons = new URL('../../img/icons.svg', import.meta.url).href; // Parcel v2
+
+import Fraction from 'fraction.js';
 
 class RecipeView {
   #parentElement = document.querySelector('.recipe');
   #data;
+  _errorMessage = 'We could not find that recipe. Please try another one!';
+  _message = 'Success';
   #generateMarkup() {
     let markup = `
           <figure class="recipe__fig">
@@ -62,7 +66,7 @@ class RecipeView {
                 <svg class="recipe__icon">
                 <use href="${icons}#icon-check"></use>
                 </svg>
-                <div class="recipe__quantity">${ing.quantity}</div>
+                <div class="recipe__quantity">${ing.quantity ? new Fraction(ing.quantity).toFraction(true) : ''}</div>
                 <div class="recipe__description">
                 <span class="recipe__unit">${ing.unit}</span>
                 ${ing.description}
@@ -94,6 +98,7 @@ class RecipeView {
 
     return markup;
   }
+
   #clean() {
     this.#parentElement.innerHTML = '';
   }
@@ -111,9 +116,43 @@ class RecipeView {
     this.#parentElement.insertAdjacentHTML('afterbegin', markup);
   }
 
+  addHandlerRender(handler) {
+    const ev = ['hashchange', 'load'];
+
+    ev.forEach(e => window.addEventListener(e, handler));
+  }
+
   render(data) {
     this.#data = data;
     let markup = this.#generateMarkup();
+    this.#clean();
+    this.#parentElement.insertAdjacentHTML('afterbegin', markup);
+  }
+
+  renderError(message = this._errorMessage) {
+    const markup = `
+        <div class="error">
+            <div>
+              <svg>
+                <use href="${icons}#icon-alert-triangle"></use>
+              </svg>
+            </div>
+            <p>${message}</p>
+          </div>`;
+    this.#clean();
+    this.#parentElement.insertAdjacentHTML('afterbegin', markup);
+  }
+
+  renderMessage(message = this._message) {
+    const markup = `
+        <div class="error">
+            <div>
+              <svg>
+                <use href="${icons}#icon-smile"></use>
+              </svg>
+            </div>
+            <p>${message}</p>
+          </div>`;
     this.#clean();
     this.#parentElement.insertAdjacentHTML('afterbegin', markup);
   }

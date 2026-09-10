@@ -23,39 +23,23 @@ async function controlRecipes() {
 
     recipeView.render(model.state.recipe);
   } catch (err) {
-    console.error(err);
+    recipeView.renderError();
   }
 }
 
-loadRecipe = async function (id) {
-  try {
-    const resp = await fetch(
-      `https://forkify-api.herokuapp.com/api/v2/recipes/${id}`,
-    );
-    const data = await resp.json();
+const controlLoadRecipe = async () => {
+  const id = window.location.hash.slice(1);
 
-    state.recipe = {};
-    state.recipe = data.data.recipe;
+  if (!id) return;
 
-    state.recipe = {
-      id: recipe.id,
-      title: recipe.title, //title
-      publisher: recipe.publisher, //done
-      sourceUrl: recipe.source_url, //done
-      image: recipe.image_url, //done
-      servings: recipe.servings, //done
-      cookTime: recipe.cooking_time, //done
-      ingredients: recipe.ingredients,
-    };
-
-    console.log(recipe);
-  } catch (err) {
-    console.error(`${err}`);
-  }
+  await model.loadRecipe(id);
 };
-const ev = ['hashchange', 'load'];
 
-ev.forEach(e => window.addEventListener(e, controlRecipes));
+const init = function () {
+  recipeView.addHandlerRender(controlRecipes);
+};
+
+init();
 
 // https://forkify-api.herokuapp.com/v2
 
